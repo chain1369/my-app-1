@@ -1,36 +1,160 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 人生追踪器 - Life Tracker
 
-## Getting Started
+一个优雅的人生数据管理系统，帮助你追踪技能、资产、健康和里程碑的进步。采用苹果风格的设计，提供直观的数据可视化和进度追踪功能。
 
-First, run the development server:
+## ✨ 特性
 
+- 🔐 **用户认证系统** - 安全的用户注册、登录和数据隔离
+- 📊 **个人仪表板** - 全面的人生数据概览和统计
+- 🎯 **技能管理** - 记录和追踪各种技能的熟练程度（1-10级评分）
+- 💰 **资产追踪** - 管理个人财务资产和投资组合
+- 🏆 **里程碑系统** - 设定目标并跟踪完成进度
+- 📈 **健康数据** - 记录身高、体重、BMI等健康指标
+- ✏️ **全面编辑功能** - 所有数据都支持增删改查操作
+- 🍎 **苹果风格UI** - 现代、简洁的用户界面设计
+- 📱 **响应式设计** - 完美适配桌面和移动设备
+- 🔒 **数据安全** - 行级安全策略确保数据隐私
+
+## 🛠️ 技术栈
+
+- **前端框架**: Next.js 15.5.4 (React 19)
+- **数据库**: Supabase (PostgreSQL)
+- **样式**: Tailwind CSS 4
+- **动画**: Framer Motion
+- **图标**: Lucide React
+- **图表**: Recharts
+- **类型安全**: TypeScript
+
+## 🚀 快速开始
+
+### 环境要求
+
+- Node.js 18+ 
+- npm 或 yarn
+
+### 安装步骤
+
+1. **克隆项目**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <your-repo-url>
+cd my-app
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **安装依赖**
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **启动开发服务器**
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. **访问应用**
+打开浏览器访问 [http://localhost:3000](http://localhost:3000)
 
-## Learn More
+## 📁 项目结构
 
-To learn more about Next.js, take a look at the following resources:
+```
+my-app/
+├── app/                    # Next.js App Router
+│   ├── globals.css        # 全局样式
+│   ├── layout.tsx         # 根布局
+│   └── page.tsx           # 主页面
+├── components/             # React 组件
+│   ├── ui/                # 基础 UI 组件
+│   │   ├── Button.tsx
+│   │   ├── Card.tsx
+│   │   ├── Input.tsx
+│   │   ├── Modal.tsx
+│   │   └── ...
+│   ├── AddSkillModal.tsx  # 添加技能模态框
+│   ├── AddMilestoneModal.tsx # 添加里程碑模态框
+│   ├── SkillCard.tsx      # 技能卡片
+│   ├── MilestoneCard.tsx  # 里程碑卡片
+│   └── StatsCard.tsx      # 统计卡片
+├── lib/                   # 工具库
+│   ├── supabase.ts        # Supabase 客户端配置
+│   └── utils.ts           # 工具函数
+└── public/                # 静态资源
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📊 数据模型
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 用户资料 (user_profile)
+- 基本信息：姓名、生日、职业、位置
+- 身体数据：身高、体重
+- 个人简介
 
-## Deploy on Vercel
+### 技能 (skills)
+- 技能名称和分类
+- 熟练程度 (1-10 级)
+- 学习开始时间
+- 描述和备注
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 资产 (assets)  
+- 资产名称和分类
+- 当前价值和购买价格
+- 购买日期和描述
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 里程碑 (milestones)
+- 目标标题和描述
+- 分类和优先级
+- 进度百分比
+- 目标日期和完成状态
+
+### 身体指标历史 (body_metrics)
+- 历史身高体重记录
+- 体脂率和肌肉量
+- 记录时间和备注
+
+## 🎨 设计特色
+
+- **苹果风格**: 采用圆角、毛玻璃效果、柔和阴影
+- **响应式**: 完美适配各种屏幕尺寸
+- **动画效果**: 流畅的过渡和交互动画
+- **数据可视化**: 直观的进度条和统计图表
+- **颜色系统**: 语义化的颜色使用
+
+## 🔧 开发命令
+
+```bash
+# 开发服务器
+npm run dev
+
+# 构建生产版本
+npm run build
+
+# 启动生产服务器
+npm run start
+```
+
+## 📝 使用指南
+
+1. **注册账号**: 点击"开始使用"创建个人账户
+2. **完善资料**: 填写个人基本信息（姓名、生日、职业等）
+3. **添加技能**: 记录你掌握的各种技能和熟练程度（1-10级）
+4. **设定里程碑**: 创建人生目标并设置优先级和进度
+5. **管理资产**: 添加和追踪各类资产价值变化
+6. **数据编辑**: 点击任意卡片即可编辑对应数据
+7. **健康追踪**: 定期更新身体健康数据和BMI指标
+
+### 🎯 核心功能
+
+- **技能评级**: 1-10级技能熟练度评分系统
+- **里程碑管理**: 支持进度追踪、优先级设置、状态管理
+- **资产组合**: 多币种资产管理，支持投资收益计算
+- **数据安全**: 每个用户的数据完全隔离和保护
+- **实时同步**: 所有数据变更即时保存到云端
+
+## 🤝 贡献
+
+欢迎提交 Issue 和 Pull Request！
+
+## 📄 许可证
+
+MIT License
+
+---
+
+**"Just like Git tracks code changes, this app tracks your life changes."** - Linus Torvalds Style 😄
