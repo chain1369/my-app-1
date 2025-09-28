@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
 import { Modal } from './ui/Modal'
 import { Input } from './ui/Input'
 import { Button } from './ui/Button'
@@ -29,7 +30,7 @@ export function AddSkillModal({ isOpen, onClose, onSuccess, userId }: AddSkillMo
     setLoading(true)
 
     try {
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('skills')
         .insert([
           {
@@ -38,8 +39,16 @@ export function AddSkillModal({ isOpen, onClose, onSuccess, userId }: AddSkillMo
             started_date: formData.started_date || null
           }
         ])
+        .select()
+        .single()
 
       if (error) throw error
+      if (data) {
+        await trackEvent({
+          name: 'skill_created',
+          data: { skillId: data.id, level: data.level },
+        })
+      }
 
       setFormData({
         name: '',

@@ -6,6 +6,7 @@ import { Input } from './ui/Input'
 import { Button } from './ui/Button'
 import { Select } from './ui/Select'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
 import { AlertTriangle, Plus } from 'lucide-react'
 
 interface AddWeaknessModalProps {
@@ -31,14 +32,22 @@ export function AddWeaknessModal({ isOpen, onClose, userId, onSuccess }: AddWeak
     setLoading(true)
 
     try {
-      const { error } = await supabase
+    const { error, data } = await supabase
         .from('weaknesses')
         .insert([{
           ...formData,
           user_id: userId
-        }])
+      }])
+      .select()
+      .single()
 
       if (error) throw error
+    if (data) {
+      await trackEvent({
+        name: 'weakness_added',
+        data: { weaknessId: data.id },
+      })
+    }
 
       onSuccess?.()
       onClose()

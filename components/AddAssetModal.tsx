@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
 import { Modal } from './ui/Modal'
 import { Input } from './ui/Input'
 import { Button } from './ui/Button'
@@ -30,7 +31,7 @@ export function AddAssetModal({ isOpen, onClose, onSuccess, userId }: AddAssetMo
     setLoading(true)
 
     try {
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('assets')
         .insert([
           {
@@ -45,8 +46,19 @@ export function AddAssetModal({ isOpen, onClose, onSuccess, userId }: AddAssetMo
             is_active: true
           }
         ])
+        .select()
+        .single()
 
       if (error) throw error
+      if (data) {
+        await trackEvent({
+          name: 'asset_added',
+          data: {
+            assetId: data.id,
+            value: data.current_value || 0,
+          },
+        })
+      }
 
       setFormData({
         name: '',

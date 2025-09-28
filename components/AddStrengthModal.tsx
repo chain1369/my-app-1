@@ -7,6 +7,7 @@ import { Button } from './ui/Button'
 import { Select } from './ui/Select'
 import { Slider } from './ui/Slider'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
 import { ThumbsUp, Plus } from 'lucide-react'
 
 interface AddStrengthModalProps {
@@ -31,14 +32,22 @@ export function AddStrengthModal({ isOpen, onClose, userId, onSuccess }: AddStre
     setLoading(true)
 
     try {
-      const { error } = await supabase
+    const { error, data } = await supabase
         .from('strengths')
         .insert([{
           ...formData,
           user_id: userId
-        }])
+      }])
+      .select()
+      .single()
 
       if (error) throw error
+    if (data) {
+      await trackEvent({
+        name: 'strength_added',
+        data: { strengthId: data.id },
+      })
+    }
 
       onSuccess?.()
       onClose()

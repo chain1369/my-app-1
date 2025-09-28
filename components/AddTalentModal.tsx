@@ -7,6 +7,7 @@ import { Button } from './ui/Button'
 import { Select } from './ui/Select'
 import { Slider } from './ui/Slider'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
 import { TalentFormData } from '@/lib/types'
 import { validateTalentForm } from '@/lib/validation'
 import { useToast } from '@/hooks/useToast'
@@ -24,15 +25,23 @@ export function AddTalentModal({ isOpen, onClose, userId, onSuccess }: AddTalent
   const { showSuccess, showError } = useToast()
 
   const submitTalent = useCallback(async (formData: TalentFormData) => {
-    const { error } = await supabase
+    const { error, data } = await supabase
       .from('talents')
       .insert([{
         ...formData,
         user_id: userId,
         discovered_date: formData.discovered_date || null
       }])
+      .select()
+      .single()
 
     if (error) throw error
+    if (data) {
+      await trackEvent({
+        name: 'talent_added',
+        data: { talentId: data.id },
+      })
+    }
     
     showSuccess('天赋添加成功', `已成功添加天赋"${formData.name}"`)
     onSuccess?.()

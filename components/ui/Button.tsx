@@ -16,7 +16,7 @@ export function Button({
   disabled,
   ...props 
 }: ButtonProps) {
-  const baseStyles = 'inline-flex items-center justify-center rounded-full font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:scale-[1.02] active:scale-[0.98]'
+  const baseStyles = 'inline-flex items-center justify-center rounded-full font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:scale-[1.02] active:scale-[0.98] touch-manipulation'
   
   const variants = {
     primary: 'bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md',
@@ -26,9 +26,9 @@ export function Button({
   }
   
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base'
+    sm: 'px-3 py-1.5 text-sm min-h-[32px]',
+    md: 'px-4 py-2 text-sm min-h-[40px]',
+    lg: 'px-6 py-3 text-base min-h-[48px]'
   }
   
   return (

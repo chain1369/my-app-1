@@ -1,0 +1,31 @@
+{
+  "name": "人生追踪器 - Life Tracker",
+  "short_name": "人生追踪器",
+  "description": "记录成长的每一步，追踪你的技能、资产、健康和里程碑",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/window.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/vercel.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["productivity", "lifestyle", "health"],
+  "lang": "zh-CN",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false,
+  "screenshots": [],
+  "shortcuts": []
+}
+
+

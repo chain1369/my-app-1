@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useAuth } from '@/lib/auth-context'
 import { supabase, UserProfile, Skill, Asset, Milestone, Talent, Strength, Weakness } from '@/lib/supabase'
 import { StatsCard } from '@/components/StatsCard'
@@ -27,6 +27,10 @@ import { EditWeaknessModal } from '@/components/EditWeaknessModal'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
+import { DataTabs } from '@/components/ui/DataTabs'
+import { HighlightCard } from '@/components/ui/HighlightCard'
+import { CelebrationOverlay } from '@/components/ui/CelebrationOverlay'
+import { ShareButton } from '@/components/ui/ShareButton'
 import { 
   User, 
   Target, 
@@ -40,16 +44,25 @@ import {
   Settings,
   Sparkles,
   ThumbsUp,
-  AlertTriangle
+  AlertTriangle,
 } from 'lucide-react'
 import { formatCurrency, calculateAge, calculateBMI, getBMICategory } from '@/lib/utils'
 import { useToast } from '@/hooks/useToast'
+import { usePerformance } from '@/hooks/usePerformance'
+import { useStreak } from '@/hooks/useStreak'
+import { useFocusAreas } from '@/hooks/useFocusAreas'
 import { ToastContainer } from '@/components/ui/Toast'
+import { SimpleLoading } from '@/components/ui/SimpleLoading'
+import { CleanHeader } from '@/components/ui/CleanHeader'
+import { CleanCard, CleanCardHeader, CleanCardContent, CleanCardTitle } from '@/components/ui/CleanCard'
+import { CleanButton } from '@/components/ui/CleanButton'
+import { CleanStatsCard } from '@/components/ui/CleanStatsCard'
 
 export default function Dashboard() {
   const { user, loading: authLoading, signOut } = useAuth()
   const [demoUser, setDemoUser] = useState<any>(null)
   const { toasts } = useToast()
+  const { measureRender } = usePerformance('Dashboard')
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [skills, setSkills] = useState<Skill[]>([])
   const [assets, setAssets] = useState<Asset[]>([])
@@ -185,11 +198,7 @@ export default function Dashboard() {
   }
 
   if (authLoading || loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    )
+    return <SimpleLoading message="正在加载您的人生数据..." />
   }
 
   if (!currentUser) {
@@ -321,100 +330,31 @@ export default function Dashboard() {
   const avgSkillLevel = skills.length > 0 ? skills.reduce((sum, skill) => sum + skill.level, 0) / skills.length : 0
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Header */}
-      <header className="bg-white/80 backdrop-blur-xl border-b border-gray-200/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                人生仪表板
-              </h1>
-              <p className="text-gray-600 mt-1">追踪你的成长与进步</p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setShowAddSkillModal(true)}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                添加技能
-              </Button>
-              <Button 
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAddMilestoneModal(true)}
-              >
-                <Target className="h-4 w-4 mr-2" />
-                新建里程碑
-              </Button>
-              <Button 
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAddAssetModal(true)}
-              >
-                <DollarSign className="h-4 w-4 mr-2" />
-                添加资产
-              </Button>
-              <Button 
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAddTalentModal(true)}
-              >
-                <Sparkles className="h-4 w-4 mr-2" />
-                添加天赋
-              </Button>
-              <Button 
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAddStrengthModal(true)}
-              >
-                <ThumbsUp className="h-4 w-4 mr-2" />
-                添加优点
-              </Button>
-              <Button 
-                variant="outline"
-                size="sm"
-                onClick={() => setShowAddWeaknessModal(true)}
-              >
-                <AlertTriangle className="h-4 w-4 mr-2" />
-                改进方面
-              </Button>
-              <div className="flex items-center space-x-2 ml-4 pl-4 border-l border-gray-200">
-                <Button 
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowEditProfileModal(true)}
-                >
-                  <Settings className="h-4 w-4" />
-                </Button>
-                <Button 
-                  variant="ghost"
-                  size="sm"
-                  onClick={signOut}
-                  className="text-red-600 hover:text-red-700"
-                >
-                  <LogOut className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-gray-50">
+      {/* 简洁导航栏 */}
+      <CleanHeader
+        onAddSkill={() => setShowAddSkillModal(true)}
+        onAddMilestone={() => setShowAddMilestoneModal(true)}
+        onAddAsset={() => setShowAddAssetModal(true)}
+        onAddTalent={() => setShowAddTalentModal(true)}
+        onAddStrength={() => setShowAddStrengthModal(true)}
+        onAddWeakness={() => setShowAddWeaknessModal(true)}
+        onEditProfile={() => setShowEditProfileModal(true)}
+        onSignOut={signOut}
+      />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* 个人信息卡片 */}
         {profile && (
-          <Card className="mb-8">
-            <CardHeader>
+          <CleanCard className="mb-8">
+            <CleanCardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="bg-blue-500 p-3 rounded-full">
-                    <User className="h-8 w-8 text-white" />
+                  <div className="w-12 h-12 bg-gray-700 rounded-lg flex items-center justify-center">
+                    <User className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <CardTitle className="text-2xl">{profile.name}</CardTitle>
+                    <CleanCardTitle>{profile.name}</CleanCardTitle>
                     <p className="text-gray-600">{profile.occupation}</p>
                     {profile.birth_date && (
                       <p className="text-sm text-gray-500">
@@ -423,126 +363,136 @@ export default function Dashboard() {
                     )}
                   </div>
                 </div>
-                <Button
+                <CleanButton
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowEditProfileModal(true)}
                 >
                   <Edit className="h-4 w-4" />
-                </Button>
+                </CleanButton>
               </div>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            </CleanCardHeader>
+            <CleanCardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 {profile.current_height && profile.current_weight && (
-                  <div className="space-y-1">
-                    <p className="text-sm text-gray-600">BMI</p>
-                    <p className="text-lg font-semibold">
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600 font-medium">BMI</p>
+                    <p className="text-2xl font-semibold text-gray-900">
                       {calculateBMI(profile.current_weight, profile.current_height)}
                     </p>
-                    <Badge 
-                      variant={getBMICategory(calculateBMI(profile.current_weight, profile.current_height)).color.includes('green') ? 'success' : 'warning'}
-                      className="text-xs"
-                    >
+                    <p className="text-xs text-gray-500">
                       {getBMICategory(calculateBMI(profile.current_weight, profile.current_height)).category}
-                    </Badge>
+                    </p>
                   </div>
                 )}
                 {profile.location && (
-                  <div className="space-y-1">
-                    <p className="text-sm text-gray-600">位置</p>
-                    <p className="text-lg font-semibold">{profile.location}</p>
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600 font-medium">位置</p>
+                    <p className="text-lg font-semibold text-gray-900">{profile.location}</p>
                   </div>
                 )}
                 {profile.bio && (
-                  <div className="space-y-1">
-                    <p className="text-sm text-gray-600">简介</p>
-                    <p className="text-sm">{profile.bio}</p>
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600 font-medium">简介</p>
+                    <p className="text-sm text-gray-700 leading-relaxed">{profile.bio}</p>
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </CleanCardContent>
+          </CleanCard>
         )}
 
         {/* 统计卡片 */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
-          <StatsCard
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+          <CleanStatsCard
             title="技能数量"
             value={skills.length}
-            change={{ value: `平均等级 ${avgSkillLevel.toFixed(1)}`, type: 'neutral' }}
+            subtitle={`平均等级 ${avgSkillLevel.toFixed(1)}`}
             icon={Award}
-            color="blue"
           />
-          <StatsCard
+          <CleanStatsCard
             title="总资产价值"
             value={formatCurrency(totalAssetValue)}
-            change={{ value: `${assets.length} 项资产`, type: 'increase' }}
+            subtitle={`${assets.length} 项资产`}
             icon={DollarSign}
-            color="green"
           />
-          <StatsCard
+          <CleanStatsCard
             title="已完成里程碑"
             value={completedMilestones}
-            change={{ value: `总共 ${milestones.length} 个`, type: 'increase' }}
+            subtitle={`总共 ${milestones.length} 个`}
             icon={Target}
-            color="purple"
           />
-          <StatsCard
+          <CleanStatsCard
             title="天赋数量"
             value={talents.length}
-            change={{ value: `平均等级 ${talents.length > 0 ? (talents.reduce((sum, t) => sum + t.level, 0) / talents.length).toFixed(1) : '0'}`, type: 'neutral' }}
+            subtitle={`平均等级 ${talents.length > 0 ? (talents.reduce((sum, t) => sum + t.level, 0) / talents.length).toFixed(1) : '0'}`}
             icon={Sparkles}
-            color="purple"
           />
-          <StatsCard
+          <CleanStatsCard
             title="优点数量"
             value={strengths.length}
-            change={{ value: "个人优势", type: 'increase' }}
+            subtitle="个人优势"
             icon={ThumbsUp}
-            color="green"
           />
-          <StatsCard
+          <CleanStatsCard
             title="改进方面"
             value={weaknesses.length}
-            change={{ value: `${weaknesses.filter(w => w.priority === 3).length} 高优先级`, type: 'neutral' }}
+            subtitle={`${weaknesses.filter(w => w.priority === 3).length} 高优先级`}
             icon={AlertTriangle}
-            color="orange"
           />
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* 技能概览 */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">技能概览</h2>
-              <Button variant="ghost" size="sm">
+              <h2 className="text-lg font-semibold text-gray-900">技能概览</h2>
+              <CleanButton variant="ghost" size="sm">
                 查看全部
-              </Button>
+              </CleanButton>
             </div>
-            <div className="grid gap-4">
+            <div className="space-y-3">
               {skills.slice(0, 6).map((skill) => (
-                <SkillCard 
+                <CleanCard 
                   key={skill.id} 
-                  skill={skill} 
-                  onEdit={(skill) => setEditingSkill(skill)}
-                />
+                  hover
+                  onClick={() => setEditingSkill(skill)}
+                  className="p-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-900">{skill.name}</h3>
+                      {skill.description && (
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-1">
+                          {skill.description}
+                        </p>
+                      )}
+                    </div>
+                    <div className="ml-4 text-right">
+                      <div className="text-lg font-semibold text-gray-900">
+                        {skill.level}/10
+                      </div>
+                      <div className="w-16 bg-gray-200 rounded-full h-1.5 mt-1">
+                        <div 
+                          className="bg-gray-700 h-1.5 rounded-full transition-all duration-500"
+                          style={{ width: `${(skill.level / 10) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </CleanCard>
               ))}
               {skills.length === 0 && (
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <Award className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">还没有添加技能</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mt-2"
-                      onClick={() => setShowAddSkillModal(true)}
-                    >
-                      添加第一个技能
-                    </Button>
-                  </CardContent>
-                </Card>
+                <CleanCard className="p-8 text-center">
+                  <Award className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-4">还没有添加技能</p>
+                  <CleanButton 
+                    variant="outline" 
+                    onClick={() => setShowAddSkillModal(true)}
+                  >
+                    添加第一个技能
+                  </CleanButton>
+                </CleanCard>
               )}
             </div>
           </div>
@@ -550,42 +500,71 @@ export default function Dashboard() {
           {/* 里程碑 */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-gray-900">近期里程碑</h2>
-              <Button variant="ghost" size="sm">
+              <h2 className="text-lg font-semibold text-gray-900">近期里程碑</h2>
+              <CleanButton variant="ghost" size="sm">
                 <Calendar className="h-4 w-4 mr-2" />
                 查看全部
-              </Button>
+              </CleanButton>
             </div>
-            <div className="grid gap-4">
+            <div className="space-y-3">
               {milestones.map((milestone) => (
-                <MilestoneCard 
+                <CleanCard 
                   key={milestone.id} 
-                  milestone={milestone} 
-                  onEdit={(milestone) => setEditingMilestone(milestone)}
-                />
+                  hover
+                  onClick={() => setEditingMilestone(milestone)}
+                  className="p-4"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-medium text-gray-900">{milestone.title}</h3>
+                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${
+                      milestone.status === 'completed' 
+                        ? 'bg-green-100 text-green-800' 
+                        : milestone.status === 'in_progress'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {milestone.status === 'completed' ? '已完成' : 
+                       milestone.status === 'in_progress' ? '进行中' : '待开始'}
+                    </span>
+                  </div>
+                  {milestone.description && (
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                      {milestone.description}
+                    </p>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 mr-4">
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-gray-700 h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${milestone.progress || 0}%` }}
+                        />
+                      </div>
+                    </div>
+                    <span className="text-sm font-medium text-gray-900">
+                      {milestone.progress || 0}%
+                    </span>
+                  </div>
+                </CleanCard>
               ))}
               {milestones.length === 0 && (
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <Target className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">还没有设置里程碑</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mt-2"
-                      onClick={() => setShowAddMilestoneModal(true)}
-                    >
-                      创建第一个里程碑
-                    </Button>
-                  </CardContent>
-                </Card>
+                <CleanCard className="p-8 text-center">
+                  <Target className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-4">还没有设置里程碑</p>
+                  <CleanButton 
+                    variant="outline" 
+                    onClick={() => setShowAddMilestoneModal(true)}
+                  >
+                    创建第一个里程碑
+                  </CleanButton>
+                </CleanCard>
               )}
             </div>
           </div>
         </div>
 
         {/* 天赋、优点缺点 */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mt-8">
           {/* 天赋 */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -604,20 +583,17 @@ export default function Dashboard() {
                 />
               ))}
               {talents.length === 0 && (
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <Sparkles className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">还没有添加天赋</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mt-2"
-                      onClick={() => setShowAddTalentModal(true)}
-                    >
-                      添加第一个天赋
-                    </Button>
-                  </CardContent>
-                </Card>
+                <CleanCard className="p-6 text-center">
+                  <Sparkles className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-4">发现您的天赋潜能</p>
+                  <CleanButton 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setShowAddTalentModal(true)}
+                  >
+                    添加第一个天赋
+                  </CleanButton>
+                </CleanCard>
               )}
             </div>
           </div>
@@ -640,20 +616,17 @@ export default function Dashboard() {
                 />
               ))}
               {strengths.length === 0 && (
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <ThumbsUp className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">还没有添加优点</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mt-2"
-                      onClick={() => setShowAddStrengthModal(true)}
-                    >
-                      添加第一个优点
-                    </Button>
-                  </CardContent>
-                </Card>
+                <CleanCard className="p-6 text-center">
+                  <ThumbsUp className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-4">记录您的个人优势</p>
+                  <CleanButton 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setShowAddStrengthModal(true)}
+                  >
+                    添加第一个优点
+                  </CleanButton>
+                </CleanCard>
               )}
             </div>
           </div>
@@ -676,20 +649,17 @@ export default function Dashboard() {
                 />
               ))}
               {weaknesses.length === 0 && (
-                <Card>
-                  <CardContent className="p-6 text-center">
-                    <AlertTriangle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                    <p className="text-gray-500">还没有添加需要改进的方面</p>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mt-2"
-                      onClick={() => setShowAddWeaknessModal(true)}
-                    >
-                      添加改进方面
-                    </Button>
-                  </CardContent>
-                </Card>
+                <CleanCard className="p-6 text-center">
+                  <AlertTriangle className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-600 mb-4">识别成长机会</p>
+                  <CleanButton 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setShowAddWeaknessModal(true)}
+                  >
+                    添加改进方面
+                  </CleanButton>
+                </CleanCard>
               )}
             </div>
           </div>
@@ -699,35 +669,38 @@ export default function Dashboard() {
         {assets.length > 0 && (
           <div className="mt-8">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">资产概览</h2>
-              <Button variant="ghost" size="sm">
+              <h2 className="text-lg font-semibold text-gray-900">资产概览</h2>
+              <CleanButton variant="ghost" size="sm">
                 查看详情
-              </Button>
+              </CleanButton>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {assets.slice(0, 6).map((asset) => (
-                <Card key={asset.id} hover onClick={() => setEditingAsset(asset)}>
-                  <CardContent className="p-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
-                          {asset.name}
-                        </h3>
-                        <Badge variant="secondary" className="text-xs">
-                          {asset.category}
-                        </Badge>
-                      </div>
-                      <p className="text-lg font-bold text-green-600">
-                        {formatCurrency(asset.current_value || 0, asset.currency)}
-                      </p>
-                      {asset.description && (
-                        <p className="text-sm text-gray-600 line-clamp-2">
-                          {asset.description}
-                        </p>
-                      )}
+                <CleanCard 
+                  key={asset.id} 
+                  hover
+                  onClick={() => setEditingAsset(asset)}
+                  className="p-4"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium text-gray-900">
+                        {asset.name}
+                      </h3>
+                      <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md">
+                        {asset.category}
+                      </span>
                     </div>
-                  </CardContent>
-                </Card>
+                    <p className="text-xl font-semibold text-gray-900">
+                      {formatCurrency(asset.current_value || 0, asset.currency)}
+                    </p>
+                    {asset.description && (
+                      <p className="text-sm text-gray-600 line-clamp-2">
+                        {asset.description}
+                      </p>
+                    )}
+                  </div>
+                </CleanCard>
               ))}
             </div>
           </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
+import { trackEvent } from '@/lib/analytics'
 import { Modal } from './ui/Modal'
 import { Input } from './ui/Input'
 import { Button } from './ui/Button'
@@ -31,7 +32,7 @@ export function AddMilestoneModal({ isOpen, onClose, onSuccess, userId }: AddMil
     setLoading(true)
 
     try {
-      const { error } = await supabase
+      const { error, data } = await supabase
         .from('milestones')
         .insert([
           {
@@ -40,6 +41,8 @@ export function AddMilestoneModal({ isOpen, onClose, onSuccess, userId }: AddMil
             target_date: formData.target_date || null
           }
         ])
+        .select()
+        .single()
 
       if (error) throw error
 
@@ -55,6 +58,12 @@ export function AddMilestoneModal({ isOpen, onClose, onSuccess, userId }: AddMil
       
       onSuccess()
       onClose()
+      if (data) {
+        await trackEvent({
+          name: 'milestone_created',
+          data: { milestoneId: data.id, status: data.status },
+        })
+      }
     } catch (error) {
       console.error('Error adding milestone:', error)
     } finally {
